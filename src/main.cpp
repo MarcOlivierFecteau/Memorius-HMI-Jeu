@@ -20,10 +20,10 @@ Testing file for final project
 
 //#define IO_QUICK_CHECK
 //#define IO_CHECKER_DEBUG
-#define DEV_PROMPTS
+//#define DEV_PROMPTS
 //#define COMM_DEBUG
 //#define AUDIO_DEBUG
-#define SPECIAL_CHARACTERS  // Compile special characters
+//#define SPECIAL_CHARACTERS  // Compile special characters
 #define GAME // Run game in loop
 
 /******************************** Global variables ********************************/
@@ -206,7 +206,7 @@ void loop()
   }
   else 
   {
-    // TO DO: random noises
+    playRandomSoundFolder(DANK);
   }
 #endif
 
@@ -859,10 +859,16 @@ void audioSetup()
 void playRandomSoundFolder(int NumFolder)
 {
   int randomFile; // File number to play
+  int Chance;
 
-  // random generation used for random file play inside a folder
-  randomFile = rand() % R2_D2_FILE_COUNT + 1;
+  srand(millis());
+  Chance = rand() % 2000;
+  if (Chance = 1000)
+  {
+    // random generation used for random file play inside a folder
+    randomFile = rand() % R2_D2_FILE_COUNT + 1;
 
-  // Play random file
-  myDFPlayer.playFolder(NumFolder, randomFile);
+    // Play random file
+    myDFPlayer.playFolder(NumFolder, randomFile);
+  }
 }
