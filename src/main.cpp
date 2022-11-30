@@ -389,11 +389,8 @@ void game()
     lcd.clear();
     PrintLCD(0, "Correct");
 
-    // Delay for user acknowledgment
-    delay(200);
-
     // Delay between two levels
-    delay(500);
+    delay(200);
   }
 }
 
