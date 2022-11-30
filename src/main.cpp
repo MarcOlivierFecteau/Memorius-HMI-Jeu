@@ -13,13 +13,15 @@ Testing file for final project
 #include <wire.h>
 #include "ComMarketing.h"
 #include "Constants.h"
+#include <SoftwareSerial.h>
+#include <DFRobotDFPlayerMini.h>
 
 /******************************** Debugging/Configuration ********************************/
 
-//#define IO_CHECKER_DEBUG
-//#define INPUT_CHECKER_DEBUG
-//#define DEV_PROMPTS
-#define COMM_DEBUG
+#define IO_CHECKER_DEBUG
+#define INPUT_CHECKER_DEBUG
+#define DEV_PROMPTS
+//#define COMM_DEBUG
 //#define AUDIO_DEBUG
 #define SPECIAL_CHARACTERS  // Compile special characters
 
@@ -123,6 +125,18 @@ byte bouche_niveau3_droit[8] =
         B00000};
 #endif
 
+/******************************** Variables audio module ********************************/
+
+#define NOTE 1
+#define DANK 2
+#define R2_D2 3
+#define WIN 4
+#define LOSE 5
+
+SoftwareSerial mySoftwareSerial(10, 11); //Pins used to send commands to module
+DFRobotDFPlayerMini myDFPlayer; 
+
+
 /******************************** Functions declaration ********************************/
 
 // Convert the button number to the corresponding pin on the Arduino
@@ -136,7 +150,7 @@ void game();
 void outputTargetLED(int button); // Briefly turn ON the corresponding button's LED, then turn it OFF.
 bool inputChecker(int targetButton);  // Detect user input, identify input and check if input is correct
 void timeout(); // Timeout function
-int rewardCheck(int score); // Determine the user's reward based on score
+void rewardCheck(int score); // Determine the user's reward based on score
 void secondChance();  // Offer the user a second chance (10 seconds timeout)
 void byeBye();  // Find another user
 
@@ -151,6 +165,11 @@ void Afficher_yeux_bouche(); // Afficher les yeux et la bouche par défaut
 /*** Setup functions ***/
 void buttonsPinsInit(); // Initialize pins' state for pins used by buttons matrix
 void LCDInit(); // Configure and initialize the LCD display
+void audioSetUp();
+
+/*** Audio Module function***/
+
+void playRandomSoundFolder(int NumFolder);
 
 /******************************** Arduino functions ********************************/
 
@@ -168,7 +187,8 @@ void setup()
   LCDInit();
 
   // Initialize the MP3 module and speaker
-  // TO DO: MP3 initialization function (Init.h)
+
+  audioSetUp();
 }
 
 void loop()
@@ -192,6 +212,14 @@ void loop()
     game();
 #endif
 
+  }
+  else 
+  {
+    int Chance = rand() % 2000;
+    if (Chance == 3)
+    {
+      playRandomSoundFolder(R2_D2);
+    }
   }
 #endif
 
@@ -331,11 +359,13 @@ void game()
     /* Output sequence to buttons matrix */
     for (int i = 0; (i <= score) & (i < MAX); i++)
     {
-      outputTargetLED(sequence[i]);
+      myDFPlayer.playFolder(DANK, sequence[i]); //À tuner quand on a la plaque
+      outputTargetLED(sequence[i]);  
       Serial.print(sequence[i]);
       Serial.print("\t");
     }
     Serial.println();
+    delay(500);
 
     /* Output message to input sequence */
     PrintLCD(0, "Entrez");
@@ -347,6 +377,9 @@ void game()
     {
       if (!inputChecker(sequence[j])) // Sequence input error
       {
+        //Play losing sound
+
+        myDFPlayer.playFolder(LOSE, 1);
         // Determine the reward
         rewardCheck(score);
 
@@ -369,7 +402,7 @@ void game()
   }
 }
 
-int rewardCheck(int score)
+void rewardCheck(int score)
 {
   /* Show score on screen */
   PrintLCD(0, "Score: ");
@@ -383,6 +416,8 @@ int rewardCheck(int score)
 
     comMarketing(READ);
 
+    myDFPlayer.playFolder(WIN, 4);
+
     // Send signal to find another human
     byeBye();
   }
@@ -392,6 +427,8 @@ int rewardCheck(int score)
     comMarketing(THIRD_REWARD_CODE);
 
     comMarketing(READ);
+
+    myDFPlayer.playFolder(WIN, 3);
 
     // Send signal to find another human
     byeBye();
@@ -403,6 +440,8 @@ int rewardCheck(int score)
 
     comMarketing(READ);
 
+    myDFPlayer.playFolder(WIN, 2);
+
     // Send signal to find another human
     byeBye();
 
@@ -413,6 +452,8 @@ int rewardCheck(int score)
     comMarketing(FIRST_REWARD_CODE);
 
     comMarketing(READ);
+
+    myDFPlayer.playFolder(WIN, 1);
 
     // Send signal to find another human
     byeBye();
@@ -431,6 +472,7 @@ int rewardCheck(int score)
     // Find another user
     byeBye();
   }
+
 }
 
 void secondChance()
@@ -440,7 +482,7 @@ void secondChance()
   firstTry = false;
 
   // Time given to user to press the middle button (ms)
-  int interval = 10000;
+  unsigned long interval = 10000;
 
   // Clear the screen
   lcd.clear();
@@ -550,7 +592,7 @@ void checkButtonMatrix()
 
 bool inputChecker(int targetButton)
   {
-    int interval = 10000; // Time given to user to press a button (ms)
+    unsigned long interval = 10000; // Time given to user to press a button (ms)
 
     // Reset timer
     prevTime = millis();
@@ -581,6 +623,7 @@ bool inputChecker(int targetButton)
         // Reset timer
         prevTime = millis();
 
+        
         while (digitalRead(K2Pin(i))) // Wait for user to release button
         {
           if (millis() - prevTime > interval) // Start timer for release timeout
@@ -772,4 +815,33 @@ void buttonsPinsInit()
   pinMode(K31_LED, OUTPUT);
   pinMode(K32_LED, OUTPUT);
   pinMode(K33_LED, OUTPUT);
+}
+
+void audioSetUp()
+{
+  mySoftwareSerial.begin(9600);
+
+Serial.println("Initializing DFPlayer ... (May take 3~5 seconds)");
+if (!myDFPlayer.begin(mySoftwareSerial)) {  //Use softwareSerial to communicate with mp3.
+    Serial.println("Unable to begin:");
+    Serial.println("1.Please recheck the connection!");
+    Serial.println("2.Please insert the SD card!");
+    while(true);
+  }
+  Serial.println("DFPlayer Mini online.");
+
+  myDFPlayer.setTimeOut(500); //Set serial communictaion time out 500ms
+
+  myDFPlayer.volume(10);  //Set volume value (0~30).
+
+  myDFPlayer.EQ(DFPLAYER_EQ_NORMAL);
+
+  myDFPlayer.outputDevice(DFPLAYER_DEVICE_SD);
+}
+
+void playRandomSoundFolder(int NumFolder)
+{
+  int x; 
+  x = rand() % 9 + 1;
+  myDFPlayer.playFolder(NumFolder, x);
 }
