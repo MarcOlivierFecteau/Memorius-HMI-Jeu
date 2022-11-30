@@ -9,10 +9,12 @@ Testing file for final project
 
 #include <Arduino.h>
 #include <LibRobus.h>
-#include <LiquidCrystal_I2C.h>
-#include <wire.h>
-#include "ComMarketing.h"
-#include "Constants.h"
+#include <LiquidCrystal_I2C.h> // LCD functions
+#include <wire.h> // LCD functions
+#include <SoftwareSerial.h> // MP3 functions
+#include <DFRobotDFPlayerMini.h> // MP3 module library
+#include "ComMarketing.h" // Function for basic communication protocol between two Arduinos
+#include "Constants.h" // Defines
 
 /******************************** Debugging/Configuration ********************************/
 
@@ -157,7 +159,7 @@ void LCDInit(); // Configure and initialize the LCD display
 void setup()
 {
   // Baud rate initalization (for serial monitor prompts)
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // Initialize the buttons matrix
   buttonsPinsInit();
@@ -173,8 +175,6 @@ void setup()
 
 void loop()
 {
-
-#ifdef COMM_DEBUG
   // Send signal to find human
   comMarketing(GAMEOVER);
 
@@ -193,7 +193,6 @@ void loop()
 #endif
 
   }
-#endif
 
 #ifdef IO_CHECKER_DEBUG
   // Check for buttons matrix's I/O configuration
@@ -201,8 +200,10 @@ void loop()
 #endif
 
 #ifdef INPUT_CHECKER_DEBUG
-  int k = 1; // Button to check input for
-  while (k < 10)
+  int buttonNumber = 1; // Button to check input for
+
+  // Check for input on buttons matrix
+  while (buttonNumber < 10)
   {
     if (inputChecker(k))
     {
@@ -726,27 +727,27 @@ void Afficher_yeux_bouche()
   // Yeux
   lcd.clear();
   lcd.setCursor(6, 0);
-  lcd.write(0);
+  lcd.write(EYE);
   lcd.setCursor(9, 0);
-  lcd.write(0);
+  lcd.write(EYE);
 
   // Bouche
   lcd.setCursor(4, 1);
-  lcd.write(4);
+  lcd.write(NORMAL_MOUTH_C);
   lcd.setCursor(5, 1);
-  lcd.write(3);
+  lcd.write(NORMAL_MOUTH_3L);
   lcd.setCursor(6, 1);
-  lcd.write(2);
+  lcd.write(NORMAL_MOUTH_2L);
   lcd.setCursor(7, 1);
-  lcd.write(1);
+  lcd.write(NORMAL_MOUTH_1L);
   lcd.setCursor(8, 1);
-  lcd.write(1);
+  lcd.write(NORMAL_MOUTH_1L);
   lcd.setCursor(9, 1);
-  lcd.write(5);
+  lcd.write(NORMAL_MOUTH_1R);
   lcd.setCursor(10, 1);
-  lcd.write(6);
+  lcd.write(NORMAL_MOUTH_2R);
   lcd.setCursor(11, 1);
-  lcd.write(7);
+  lcd.write(NORMAL_MOUTH_3R);
 }
 
 void buttonsPinsInit()
