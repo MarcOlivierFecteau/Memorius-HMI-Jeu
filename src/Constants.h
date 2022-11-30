@@ -76,3 +76,22 @@ bool firstTry = true;  // Second chance token. Voided when calling the function 
 // Define other constants for MP3 module
 #define DEFAULT_VOLUME 10 // Set speaker volume during initialization
 #define R2_D2_FILES 6 // Number of files for random R2-D2 noises
+
+/*** Define file ID for each file ***/
+
+// Define for "DANK"
+#define ANDROID_NOTIFICATION 1
+#define BRUH 2
+#define DOLPHIN 3
+#define WHAT_THE_DOG_DOIN 4
+#define FART 5
+#define ROBLOX_DEAD_SOUND 6
+#define THE_ROCK_EYEBROW 7
+#define TACO_BELL 8
+#define WINDOWS_ERROR 9
+
+// Define for "WIN"
+#define ROBLOX_CONGRATS 1 // First reward track
+#define SUPER_MARIO_BROS_FINISH 2 // Second reward track
+#define THIS_IS_EPIC 3 // Third reward track
+#define RICK_ROLL 4 // Final boss track
