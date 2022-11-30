@@ -205,12 +205,20 @@ void loop()
     PrintLCD(0, "Bonjour");
 
     // Ask user if he wants to play
-    wannaPlay();
+    if (wannaPlay())
+    {
+      // Turn off blinking LED
+      digitalWrite(ButtonToLEDPin(5), LOW);
+      game();
+    }
+    else
+    {
+      byeBye();
+    }
   }
   else 
   {
-    playRandomSoundFolder(DANK);
-    delay(5000);
+    playRandomSoundFolder(R2_D2);
   }
 #endif
 
@@ -374,9 +382,6 @@ void game()
     {
       if (!inputChecker(sequence[j])) // Sequence input error
       {
-        //Play losing sound
-        myDFPlayer.playFolder(LOSE, 1);
-
         // Determine the reward
         rewardCheck(score);
 
@@ -409,10 +414,10 @@ void rewardCheck(int score)
     // Send signal to first Arduino
     comMarketing(FINAL_BOSS_CODE);
 
-    comMarketing(READ);
-
-    // Play final boss soundtrack
+     // Play final boss soundtrack
     myDFPlayer.playFolder(WIN, 4);
+
+    comMarketing(READ);
 
     // Send signal to find another human
     byeBye();
@@ -422,10 +427,10 @@ void rewardCheck(int score)
     // Send signal to first Arduino
     comMarketing(THIRD_REWARD_CODE);
 
-    comMarketing(READ);
-
     // Play third reward soundtrack
     myDFPlayer.playFolder(WIN, 3);
+
+    comMarketing(READ);
 
     // Send signal to find another human
     byeBye();
@@ -435,10 +440,10 @@ void rewardCheck(int score)
     // Send signal to first Arduino
     comMarketing(SECOND_REWARD_CODE);
 
-    comMarketing(READ);
-
     // Play second reward soundtrack
     myDFPlayer.playFolder(WIN, 2);
+
+    comMarketing(READ);
 
     // Send signal to find another human
     byeBye();
@@ -448,16 +453,18 @@ void rewardCheck(int score)
     // Send signal to first Arduino
     comMarketing(FIRST_REWARD_CODE);
 
-    comMarketing(READ);
-
     // Play first reward soundtrack
     myDFPlayer.playFolder(WIN, 1);
+
+    comMarketing(READ);
 
     // Send signal to find another human
     byeBye();
   }
   else if (firstTry) // If second chance token is available
   {
+    myDFPlayer.playFolder(LOSE, 1);
+    delay(1500);
     // Offer user a second chance
     secondChance();
   }
@@ -494,6 +501,7 @@ tryAgainCheck:
   // Check for timeout
   if (millis() - prevTime <= secondChanceTimeoutInterval)
   {
+    blinkingLED(5);
 
     // Check for input
     if (digitalRead(K22))
@@ -543,8 +551,8 @@ void timeout()
   else // J-P is trying to fuck up the robot
   {
     // Show J-P we know it's him
-    PrintLCD(0, "JP TIME");
-    myDFPlayer.playFolder(8,rand() % 2 + 1);
+    PrintLCD(0, "ALEX ET JP TIME");
+    myDFPlayer.playFolder(8, millis()%2 +1);
 
     delay(8000);
 
@@ -646,7 +654,6 @@ bool inputChecker(int targetButton)
             // Show user has pressed the button too long
             timeout();
 #endif
-
             // End function
             return false;
           }
@@ -869,17 +876,18 @@ void audioSetup()
 void playRandomSoundFolder(int NumFolder)
 {
   int randomFile; // File number to play
-  int Chance;
+  int randomSoundInterval = 20000;
 
-  srand(millis());
-  Chance = rand() % 2000;
-  if (Chance = 1000)
+  if (millis() - prevTime > randomSoundInterval)
   {
-    // random generation used for random file play inside a folder
-    randomFile = rand() % R2_D2_FILE_COUNT + 1;
+    // Reset timer
+    prevTime = millis();
 
-    // Play random file
-    myDFPlayer.playFolder(NumFolder, randomFile);
+    // Coin flip
+    if (rand() % 2) // Play random R2-D2 noises
+    {
+      myDFPlayer.playFolder(NumFolder, randomFile);
+    }
   }
 }
 
@@ -889,6 +897,8 @@ bool wannaPlay()
   PrintLCD(0, "Voulez-vous");
   PrintLCD(1, "jouer avec moi?");
 
+  blinkingLED(5);
+
   delay(2000);
 
   lcd.clear();
@@ -897,25 +907,18 @@ bool wannaPlay()
 
   int intervalInvitation = 10000;
 
-startCheck:
-  if (millis() - prevTime > intervalInvitation) // Timeout reached
-  {
-    return false;
-  }
-  else // Timeout not reached
-  {
-    blinkingLED(5);
+  // Reset timer
+  prevTime = millis();
 
-    if (digitalRead(ButtonToPin(5))) // Input detected
+  while (!digitalRead(ButtonToPin(5)))
+  {
+    if (millis() - prevTime > intervalInvitation) // Timeout reached
     {
-      // Start game
-      return true;
+      return false;
     }
-    else // No input
-    {
-      goto startCheck;
-    }
+    blinkingLED(5);
   }
+  return true;
 }
 
 void blinkingLED(int buttonNumber)
@@ -939,3 +942,5 @@ void blinkingLED(int buttonNumber)
     prevTime = millis();
   }
 }
+
+
