@@ -139,7 +139,9 @@ int ButtonToPin(int buttonNumber);
 
 /*** Game functions ***/
 void game();
+bool wannaPlay(); // Prompts the user to start a game (10 seconds timeout)
 void outputTargetLED(int button); // Briefly turn ON the corresponding button's LED, then turn it OFF.
+void blinkingLED(int buttonNumber); // Periodically switch an LED's state (500 ms)
 bool inputChecker(int targetButton);  // Detect user input, identify input and check if input is correct
 void timeout(); // Timeout function
 void rewardCheck(int score); // Determine the user's reward based on score
@@ -161,6 +163,7 @@ void audioSetup();
 
 /*** Audio Module function ***/
 void playRandomSoundFolder(int NumFolder);
+
 
 /******************************** Arduino functions ********************************/
 
@@ -201,12 +204,13 @@ void loop()
     // Greet the user
     PrintLCD(0, "Bonjour");
 
-    // Start game
-    game();
+    // Ask user if he wants to play
+    wannaPlay();
   }
   else 
   {
     playRandomSoundFolder(DANK);
+    delay(5000);
   }
 #endif
 
@@ -359,7 +363,6 @@ void game()
 
     }
     Serial.println();
-    delay(500);
 
     /* Output message to input sequence */
     PrintLCD(0, "Entrez");
@@ -475,7 +478,7 @@ void secondChance()
   firstTry = false;
 
   // Time given to user to press the middle button (ms)
-  unsigned long interval = 10000;
+  unsigned long secondChanceTimeoutInterval = 10000;
 
   // Clear the screen
   lcd.clear();
@@ -489,7 +492,7 @@ void secondChance()
 
 tryAgainCheck:
   // Check for timeout
-  if (millis() - prevTime <= interval)
+  if (millis() - prevTime <= secondChanceTimeoutInterval)
   {
 
     // Check for input
@@ -508,7 +511,6 @@ tryAgainCheck:
       delay(3000); // Delay before next game starts
       game();
     }
-    // TO DO: switch middle button's LED's state
     else // No input
     {
       // Repeatedly check for input until second chance timeout
@@ -538,9 +540,16 @@ void timeout()
     // Check for reward
     rewardCheck(score);
   }
-  else // User was bugging Memorius
+  else // J-P is trying to fuck up the robot
   {
-    // TO DO: madgeRobot function
+    // Show J-P we know it's him
+    PrintLCD(0, "JP TIME");
+    myDFPlayer.playFolder(8,rand() % 2 + 1);
+
+    delay(8000);
+
+    // Find another user
+    byeBye();
   }
 }
 
@@ -585,24 +594,22 @@ void checkButtonMatrix()
 
 bool inputChecker(int targetButton)
   {
-    unsigned long interval = 10000; // Time given to user to press a button (ms)
+    unsigned long timeoutInterval = 10000; // Time given to user to press a button (ms)
 
     // Reset timer
     prevTime = millis();
 
   recheck:
-    if (millis() - prevTime > interval) // Start timer for input timeout
+    if (millis() - prevTime > timeoutInterval) // Start timer for input timeout
     {
 
 #ifdef DEV_PROMPTS
     // Show user took too long to press a button
     Serial.println("Input timeout.");
 #else
-    // Show user took too long to press a button
-    PrintLCD(0, "Trop long!");
 
-    // Play the "you lost!" sound
-    myDFPlayer.playFolder(LOSE, 1);
+    timeout();
+    
 #endif
 
     return false; // End function
@@ -619,14 +626,14 @@ bool inputChecker(int targetButton)
         myDFPlayer.playFolder(DANK, i);
         
         // (Shorter) time given to user to release the button (ms)
-        interval = 5000;
+        timeoutInterval = 5000;
 
         // Reset timer
         prevTime = millis();
 
         while (digitalRead(ButtonToPin(i))) // Wait for user to release button
         {
-          if (millis() - prevTime > interval) // Start timer for release timeout
+          if (millis() - prevTime > timeoutInterval) // Start timer for release timeout
           {
 
 #ifdef DEV_PROMPTS
@@ -637,9 +644,7 @@ bool inputChecker(int targetButton)
             digitalWrite(ButtonToLEDPin(i), LOW);
 
             // Show user has pressed the button too long
-            lcd.clear();
-            delay(250);
-            PrintLCD(0, "Trop long!");
+            timeout();
 #endif
 
             // End function
@@ -673,7 +678,7 @@ bool inputChecker(int targetButton)
 #else
           // Show user the input was incorrect
           lcd.clear();
-          PrintLCD(0, "Partie terminée");
+          PrintLCD(0, "Partie terminee");
           delay(2000);  // Delay for user acknowledgement
 #endif
 
@@ -875,5 +880,62 @@ void playRandomSoundFolder(int NumFolder)
 
     // Play random file
     myDFPlayer.playFolder(NumFolder, randomFile);
+  }
+}
+
+bool wannaPlay()
+{
+  lcd.clear();
+  PrintLCD(0, "Voulez-vous");
+  PrintLCD(1, "jouer avec moi?");
+
+  delay(2000);
+
+  lcd.clear();
+  PrintLCD(0, "Appuyer sur le");
+  PrintLCD(1, "bouton central");
+
+  int intervalInvitation = 10000;
+
+startCheck:
+  if (millis() - prevTime > intervalInvitation) // Timeout reached
+  {
+    return false;
+  }
+  else // Timeout not reached
+  {
+    blinkingLED(5);
+
+    if (digitalRead(ButtonToPin(5))) // Input detected
+    {
+      // Start game
+      return true;
+    }
+    else // No input
+    {
+      goto startCheck;
+    }
+  }
+}
+
+void blinkingLED(int buttonNumber)
+{
+  int blinkingInterval = 1000; // Blinking interval in ms
+
+  if (millis() - prevTime <= blinkingInterval)
+  {
+    if (millis() - prevTime <= blinkingInterval/2)
+    {
+      digitalWrite(ButtonToLEDPin(buttonNumber), HIGH);
+    }
+    else
+    {
+      digitalWrite(ButtonToLEDPin(buttonNumber), LOW);
+    }
+  }
+  else
+  {
+    // Reset timer
+    prevTime = millis();
   }
 }
