@@ -20,10 +20,10 @@ Testing file for final project
 
 //#define IO_QUICK_CHECK
 //#define IO_CHECKER_DEBUG
-#define DEV_PROMPTS
+//#define DEV_PROMPTS
 //#define COMM_DEBUG
 //#define AUDIO_DEBUG
-#define SPECIAL_CHARACTERS  // Compile special characters
+#define SPECIAL_CHARACTERS  // Compile special characters (mostly here so we can collapse the section)
 #define GAME // Run game in loop
 
 /******************************** Global variables ********************************/
@@ -618,6 +618,8 @@ bool inputChecker(int targetButton)
     {
       if (digitalRead(ButtonToPin(i))) // Detected an input
       {
+        delay(10);
+
         // (Shorter) time given to user to release the button (ms)
         interval = 5000;
 
@@ -647,6 +649,7 @@ bool inputChecker(int targetButton)
             digitalWrite(ButtonToLEDPin(i), HIGH);
           }
         }
+        delay(10);
 
         // Reset pressed button's LED's state
         digitalWrite(ButtonToLEDPin(i), LOW);
