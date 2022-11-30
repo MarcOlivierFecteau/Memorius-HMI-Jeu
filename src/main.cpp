@@ -178,9 +178,6 @@ void setup()
   // Initialize the MP3 module
   audioSetup();
 
-  // Added delay for modules initialization completion
-  delay(5000);
-
 #ifdef DEV_PROMPTS
   // For user acknowledgment that setup is completed
   Serial.println("Setup completed: Test can start.");
@@ -336,7 +333,7 @@ void game()
 
 #ifdef DEV_PROMPTS
 
-    PrintLCD(0, "Initialisation");
+    PrintLCD(0, "Sequence generated.");
 
 #endif
 
@@ -347,6 +344,7 @@ void game()
   {
     // Clear screen
     lcd.clear();
+    delay(250);
 
     /* Output sequence to buttons matrix */
     for (int i = 0; (i <= score) & (i < MAX); i++)
@@ -698,6 +696,11 @@ bool inputChecker(int targetButton)
 
 void LCDInit()
 {
+
+#ifdef DEV_PROMPTS
+  Serial.println("Initializing LCD screen ... (May take 3~5 seconds)");
+#endif
+
   // Specify the number of columns and rows of the LCD display
   lcd.begin(COLS, ROWS);
 
@@ -719,10 +722,8 @@ void LCDInit()
   lcd.createChar(NORMAL_MOUTH_2R, bouche_niveau2_droit);
   lcd.createChar(NORMAL_MOUTH_3R, bouche_niveau3_droit);
 
-#ifdef DEV_PROMPTS
-  Serial.println("Initializing LCD screen ... (May take 3~5 seconds)");
+  // Added delay for LCD initialization completion
   delay(3000);
-#endif
 
   // Show normal eye and mouth
   Afficher_yeux_bouche();
@@ -755,6 +756,9 @@ void PrintLCD(int ligne, char texte[])
   {
     Curseur = 0;
   }
+  // Clear screen
+  lcd.clear();
+  delay(250);
 
   // Placer le curseur
   lcd.setCursor(Curseur, ligne);
@@ -847,6 +851,9 @@ void audioSetup()
 
   // Setup output device
   myDFPlayer.outputDevice(DFPLAYER_DEVICE_SD);
+
+  // Added delay for module initialization completion
+  delay(3000);
 }
 
 void playRandomSoundFolder(int NumFolder)
