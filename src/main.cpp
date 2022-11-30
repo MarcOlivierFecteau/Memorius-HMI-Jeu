@@ -32,6 +32,9 @@ unsigned long prevTime = 0; // Countdown timer reset
 
 LiquidCrystal_I2C lcd(0x27, COLS, ROWS); // Create object for LCD display
 
+SoftwareSerial mySoftwareSerial(MP3_RX, MP3_TX); // RX/TX pins for MP3 module
+DFRobotDFPlayerMini myDFPlayer; // TO DO: understand what this function does
+
 /******************************** Special characters initialization ********************************/
 
 #ifdef SPECIAL_CHARACTERS
@@ -125,18 +128,6 @@ byte bouche_niveau3_droit[8] =
         B00000};
 #endif
 
-/******************************** Variables audio module ********************************/
-
-#define NOTE 1
-#define DANK 2
-#define R2_D2 3
-#define WIN 4
-#define LOSE 5
-
-SoftwareSerial mySoftwareSerial(10, 11); //Pins used to send commands to module
-DFRobotDFPlayerMini myDFPlayer; 
-
-
 /******************************** Functions declaration ********************************/
 
 // Convert the button number to the corresponding pin on the Arduino
@@ -167,8 +158,7 @@ void buttonsPinsInit(); // Initialize pins' state for pins used by buttons matri
 void LCDInit(); // Configure and initialize the LCD display
 void audioSetUp();
 
-/*** Audio Module function***/
-
+/*** Audio Module function ***/
 void playRandomSoundFolder(int NumFolder);
 
 /******************************** Arduino functions ********************************/
@@ -181,14 +171,17 @@ void setup()
   // Initialize the buttons matrix
   buttonsPinsInit();
 
-  /*** Initialize special characters ***/
-
   // Initialize LCD display
   LCDInit();
 
-  // Initialize the MP3 module and speaker
-
+  // Initialize the MP3 module
   audioSetUp();
+
+#ifdef DEV_PROMPTS
+  // For user acknowledgment that setup is completed
+  Serial.println(Setup completed. You can start test.);
+#endif
+
 }
 
 void loop()
