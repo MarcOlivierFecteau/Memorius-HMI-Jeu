@@ -63,8 +63,8 @@ bool firstTry = true;  // Second chance token. Voided when calling the function 
 #define FINAL_BOSS_CODE '7' // Code for final boss reward
 
 // Define pins for MP3 module
-#define MP3_RX 0 // MP3 module reception pin
-#define MP3_TX 1 // MP3 module transmission pin
+#define MP3_RX 10 // MP3 module reception pin
+#define MP3_TX 11 // MP3 module transmission pin
 
 // Define Folder names for MP3 Module
 #define NOTE 1 // Contains sounds for the buttons matrix

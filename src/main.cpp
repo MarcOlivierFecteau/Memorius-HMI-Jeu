@@ -18,10 +18,10 @@ Testing file for final project
 
 /******************************** Debugging/Configuration ********************************/
 
-//#define IO_CHECKER_DEBUG
+#define IO_CHECKER_DEBUG
 //#define INPUT_CHECKER_DEBUG
-//#define DEV_PROMPTS
-#define COMM_DEBUG
+#define DEV_PROMPTS
+//#define COMM_DEBUG
 //#define AUDIO_DEBUG
 #define SPECIAL_CHARACTERS  // Compile special characters
 
@@ -175,6 +175,8 @@ void setup()
 
 void loop()
 {
+
+#ifndef IO_CHECKER_DEBUG
   // Send signal to find human
   comMarketing(GAMEOVER);
 
@@ -193,6 +195,7 @@ void loop()
 #endif
 
   }
+#endif
 
 #ifdef IO_CHECKER_DEBUG
   // Check for buttons matrix's I/O configuration
