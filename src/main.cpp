@@ -126,10 +126,10 @@ byte bouche_niveau3_droit[8] =
 /******************************** Functions declaration ********************************/
 
 // Convert the button number to the corresponding pin on the Arduino
-int K2LEDPin(int buttonNumber);
+int ButtonToLEDPin(int buttonNumber);
 
 // Convert the button number to the corresponding button pin on the Arduino
-int K2Pin(int buttonNumber);
+int ButtonToPin(int buttonNumber);
 
 /*** Game functions ***/
 void game();
@@ -222,7 +222,7 @@ void loop()
 void outputTargetLED(int button)
 {
   /* From the button number, the LED of the corresponding button is lit for 500ms, then turned OFF */
-  int buttonID = K2LEDPin(button);
+  int buttonID = ButtonToLEDPin(button);
 
   // Briefly turn ON the LED, then turn OFF the LED.
   digitalWrite(buttonID, HIGH);
@@ -231,7 +231,7 @@ void outputTargetLED(int button)
   delay(100);
 }
 
-int K2LEDPin(int buttonNumber)
+int ButtonToLEDPin(int buttonNumber)
 {
   /* From the button number ∈ [1,9], output the corresponding LED digital pin on the Arduino */
   switch (buttonNumber)
@@ -265,7 +265,7 @@ int K2LEDPin(int buttonNumber)
   }
 }
 
-int K2Pin(int buttonNumber)
+int ButtonToPin(int buttonNumber)
 {
   /* From the button number [1,9], output the corresponding digital pin on the Arduino */
   switch (buttonNumber)
@@ -524,10 +524,10 @@ void checkButtonMatrix()
 {
   for (int i = 1; i < 10; i++)
   {
-    if (digitalRead(K2Pin(i))) // If input is HIGH, corresponding LED is HIGH
+    if (digitalRead(ButtonToPin(i))) // If input is HIGH, corresponding LED is HIGH
     {
       // Acknowledge input by lighting up pressed button's LED
-      digitalWrite(K2LEDPin(i), HIGH);
+      digitalWrite(ButtonToLEDPin(i), HIGH);
 
 /*** Debugging section ***/
 #ifdef INPUT_CHECKER_DEBUG
@@ -543,7 +543,7 @@ void checkButtonMatrix()
 #endif
 
         // Reset pressed button's LED's state
-        digitalWrite(K2LEDPin(i), LOW);
+        digitalWrite(ButtonToLEDPin(i), LOW);
       }
     }
   }
@@ -573,7 +573,7 @@ bool inputChecker(int targetButton)
   {
     for (int i = 1; i < 10; i++)  // Go through every button
     {
-      if (digitalRead(K2Pin(i))) // Detected an input
+      if (digitalRead(ButtonToPin(i))) // Detected an input
       {
         // (Shorter) time given to user to release the button (ms)
         interval = 5000;
@@ -581,7 +581,7 @@ bool inputChecker(int targetButton)
         // Reset timer
         prevTime = millis();
 
-        while (digitalRead(K2Pin(i))) // Wait for user to release button
+        while (digitalRead(ButtonToPin(i))) // Wait for user to release button
         {
           if (millis() - prevTime > interval) // Start timer for release timeout
           {
@@ -601,12 +601,12 @@ bool inputChecker(int targetButton)
           else  // Release timeout not reached
           {
             // Acknowledge input by lighting up pressed button's LED
-            digitalWrite(K2LEDPin(i), HIGH);
+            digitalWrite(ButtonToLEDPin(i), HIGH);
           }
         }
 
         // Reset pressed button's LED's state
-        digitalWrite(K2LEDPin(i), LOW);
+        digitalWrite(ButtonToLEDPin(i), LOW);
 
 /*** Debugging section ***/
 #ifdef INPUT_CHECKER_DEBUG
