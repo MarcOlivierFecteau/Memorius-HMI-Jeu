@@ -18,9 +18,9 @@ Testing file for final project
 
 /******************************** Debugging/Configuration ********************************/
 
-#define IO_CHECKER_DEBUG
+//#define IO_CHECKER_DEBUG
 //#define INPUT_CHECKER_DEBUG
-#define DEV_PROMPTS
+//#define DEV_PROMPTS
 //#define COMM_DEBUG
 //#define AUDIO_DEBUG
 #define SPECIAL_CHARACTERS  // Compile special characters
@@ -194,7 +194,6 @@ void setup()
 void loop()
 {
 
-#ifndef IO_CHECKER_DEBUG
   // Send signal to find human
   comMarketing(GAMEOVER);
 
@@ -221,7 +220,6 @@ void loop()
       playRandomSoundFolder(R2_D2);
     }
   }
-#endif
 
 #ifdef IO_CHECKER_DEBUG
   // Check for buttons matrix's I/O configuration
@@ -234,9 +232,9 @@ void loop()
   // Check for input on buttons matrix
   while (buttonNumber < 10)
   {
-    if (inputChecker(k))
+    if (inputChecker(buttonNumber))
     {
-      k++;
+      buttonNumber++;
     }
     else
     {
@@ -574,7 +572,7 @@ void checkButtonMatrix()
       digitalWrite(ButtonToLEDPin(i), HIGH);
 
 /*** Debugging section ***/
-#ifdef INPUT_CHECKER_DEBUG
+#ifdef IO_CHECKER_DEBUG
 
         // Show button ID on screen
         lcd.clear();
