@@ -1,75 +1,83 @@
+/*
+Projet S1 2022 - Équipe P-24: Memorius
+File for basic communication protocol between the Arduinos
+@author Thomas-Xavier Guimont
+@version 1.1 11/27/2022
+*/
 
-//#define TEST_COM
-//0=Serial.read
+unsigned long ComTime = 0;
+unsigned long PrevComTime = 0;
 
-//Lucius
-//1=Arrivé personne
-//2=Fini Récompense
+int comMarketing(int Com)
+{
 
-//Dobby
-//3=Fini Personne
-//4=Recompanse 1
-//5=Recompanse 2
-//6=Recompanse 3
-unsigned long ComTime=0;
-unsigned long PrevComTime=0;
+    char readSerial[30];
 
-int comMarketing(int Com){
+    Serial1.begin(9600);
 
-char readSerial[30];
+    if (Com == '0')
+    {
 
-Serial1.begin(9600);
-
-if(Com=='0'){
-    
-    while (Com=='0'){
-    if(Serial1.available()>0){delay(10);
-    for(int i=0;Serial1.available()>0;i++){
-    readSerial[i] =  Serial1.read();
-    }
-    Com=readSerial[0];
-    }
-    }
-
-    Serial1.write('0');
-    #ifdef TEST_COM
-    Serial.print("read");
-    Serial.println((char)Com);
-    #endif
-    return Com;
-}
-
-if(Com!='0'){
-    
-    PrevComTime=millis();
-
-    while(Com!='0'){
-
-        ComTime=millis();
-
-        if(ComTime-PrevComTime>200 and Com!='0'){
-         
-         Serial1.write((char)Com);
-         
-         
-         #ifdef TEST_COM
-         Serial.print("write");
-         Serial.println((char)Com);
-         #endif
-         PrevComTime=ComTime;
-        } 
-        else  if(Serial1.available()>0){delay(10);
-            for(int i=0;Serial1.available()>0;i++){
-                 readSerial[i] =  Serial1.read();
+        while (Com == '0')
+        {
+            if (Serial1.available() > 0)
+            {
+                delay(10);
+                for (int i = 0; Serial1.available() > 0; i++)
+                {
+                    readSerial[i] = Serial1.read();
+                }
+                Com = readSerial[0];
             }
-            Com=readSerial[0];
         }
 
+        Serial1.write('0');
 
+#ifdef TEST_COM
+        Serial.print("read");
+        Serial.println((char)Com);
+#endif
+
+        return Com;
+    }
+
+    if (Com != '0')
+    {
+
+        PrevComTime = millis();
+
+        while (Com != '0')
+        {
+
+            ComTime = millis();
+
+            if (ComTime - PrevComTime > 200 and Com != '0')
+            {
+
+                Serial1.write((char)Com);
+
+#ifdef TEST_COM
+                Serial.print("write");
+                Serial.println((char)Com);
+#endif
+
+                PrevComTime = ComTime;
+            }
+            else if (Serial1.available() > 0)
+            {
+                delay(10);
+                for (int i = 0; Serial1.available() > 0; i++)
+                {
+                    readSerial[i] = Serial1.read();
+                }
+                Com = readSerial[0];
+            }
         }
     }
-    #ifdef TEST_COM
+
+#ifdef TEST_COM
     Serial.println((char)Com);
-    #endif
+#endif
+
     return Com;
 }
