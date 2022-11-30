@@ -23,7 +23,7 @@ Testing file for final project
 //#define DEV_PROMPTS
 //#define COMM_DEBUG
 //#define AUDIO_DEBUG
-//#define SPECIAL_CHARACTERS  // Compile special characters
+#define SPECIAL_CHARACTERS // Compile special characters (mostly here so we can collapse the section)
 #define GAME // Run game in loop
 
 /******************************** Global variables ********************************/
@@ -382,20 +382,18 @@ void game()
       }
     }
 
-    // All inputs were correct: increase score and go to next level.
+    // All inputs were correct: increase score.
     score++;
-    delay(2000);
 
-// Debugging section
-#ifdef DEV_PROMPTS
     // Show user the input sequence was correct
     lcd.clear();
     PrintLCD(0, "Correct");
 
-    // Delay for screen to show message
+    // Delay for user acknowledgment
     delay(200);
-#endif
 
+    // Delay between two levels
+    delay(500);
   }
 }
 
@@ -618,6 +616,8 @@ bool inputChecker(int targetButton)
     {
       if (digitalRead(ButtonToPin(i))) // Detected an input
       {
+        delay(10);
+
         // (Shorter) time given to user to release the button (ms)
         interval = 5000;
 
@@ -647,6 +647,7 @@ bool inputChecker(int targetButton)
             digitalWrite(ButtonToLEDPin(i), HIGH);
           }
         }
+        delay(10);
 
         // Reset pressed button's LED's state
         digitalWrite(ButtonToLEDPin(i), LOW);
