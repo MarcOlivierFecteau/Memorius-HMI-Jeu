@@ -18,12 +18,13 @@ Testing file for final project
 
 /******************************** Debugging/Configuration ********************************/
 
+//#define IO_QUICK_CHECK
 //#define IO_CHECKER_DEBUG
-//#define INPUT_CHECKER_DEBUG
 //#define DEV_PROMPTS
 //#define COMM_DEBUG
 //#define AUDIO_DEBUG
 #define SPECIAL_CHARACTERS  // Compile special characters
+//#define GAME // Run game in loop
 
 /******************************** Global variables ********************************/
 
@@ -156,7 +157,7 @@ void Afficher_yeux_bouche(); // Afficher les yeux et la bouche par défaut
 /*** Setup functions ***/
 void buttonsPinsInit(); // Initialize pins' state for pins used by buttons matrix
 void LCDInit(); // Configure and initialize the LCD display
-void audioSetUp();
+void audioSetup();
 
 /*** Audio Module function ***/
 void playRandomSoundFolder(int NumFolder);
@@ -175,7 +176,7 @@ void setup()
   LCDInit();
 
   // Initialize the MP3 module
-  audioSetUp();
+  audioSetup();
 
 #ifdef DEV_PROMPTS
   // For user acknowledgment that setup is completed
@@ -214,12 +215,12 @@ void loop()
     }
   }
 
-#ifdef IO_CHECKER_DEBUG
+#ifdef IO_QUICK_CHECK
   // Check for buttons matrix's I/O configuration
   checkButtonMatrix();
 #endif
 
-#ifdef INPUT_CHECKER_DEBUG
+#ifdef IO_CHECKER_DEBUG
   int buttonNumber = 1; // Button to check input for
 
   // Check for input on buttons matrix
@@ -565,7 +566,7 @@ void checkButtonMatrix()
       digitalWrite(ButtonToLEDPin(i), HIGH);
 
 /*** Debugging section ***/
-#ifdef IO_CHECKER_DEBUG
+#ifdef IO_QUICK_CHECK
 
         // Show button ID on screen
         lcd.clear();
@@ -600,6 +601,9 @@ bool inputChecker(int targetButton)
 #else
     // Show user took too long to press a button
     PrintLCD(0, "Trop long!");
+
+    // Play the "you lost!" sound
+    myDFPlayer.playFolder(LOSE, 1);
 #endif
 
     return false; // End function
@@ -644,7 +648,7 @@ bool inputChecker(int targetButton)
         digitalWrite(ButtonToLEDPin(i), LOW);
 
 /*** Debugging section ***/
-#ifdef INPUT_CHECKER_DEBUG
+#ifdef IO_CHECKER_DEBUG
         // Show button ID on serial monitor
         Serial.print("Button pressed: ");
         Serial.println(i);
@@ -699,22 +703,20 @@ void LCDInit()
   lcd.backlight();
 
   // Create default eye character
-  lcd.createChar(0, eye);
+  lcd.createChar(EYE, eye);
 
   // Create default mouth characters
-  lcd.createChar(1, bouche_centre);
-  lcd.createChar(2, bouche_niveau1_gauche);
-  lcd.createChar(3, bouche_niveau2_gauche);
-  lcd.createChar(4, bouche_niveau3_gauche);
-  lcd.createChar(5, bouche_niveau1_droit);
-  lcd.createChar(6, bouche_niveau2_droit);
-  lcd.createChar(7, bouche_niveau3_droit);
+  lcd.createChar(NORMAL_MOUTH_C, bouche_centre);
+  lcd.createChar(NORMAL_MOUTH_1L, bouche_niveau1_gauche);
+  lcd.createChar(NORMAL_MOUTH_2L, bouche_niveau2_gauche);
+  lcd.createChar(NORMAL_MOUTH_3L, bouche_niveau3_gauche);
+  lcd.createChar(NORMAL_MOUTH_1R, bouche_niveau1_droit);
+  lcd.createChar(NORMAL_MOUTH_2R, bouche_niveau2_droit);
+  lcd.createChar(NORMAL_MOUTH_3R, bouche_niveau3_droit);
 
 #ifdef DEV_PROMPTS
   Serial.println("Initializing LCD screen ... (May take 3~5 seconds)");
 #endif
-
-  delay(3000); // Delay for LCD screen initialization
 
   // Show normal eye and mouth
   Afficher_yeux_bouche();
@@ -725,13 +727,12 @@ void LCDInit()
 
 int Longueur_chaine(char texte[])
 {
-  int Longueur_chaine=0;
+  int Longueur_chaine = 0;
 
-  while(texte[Longueur_chaine]!='\0')
+  while (texte[Longueur_chaine] != '\0')
   {
-    Longueur_chaine=Longueur_chaine+1;
+    Longueur_chaine += 1;
   }
-  Longueur_chaine=Longueur_chaine-1; //longueur chaine a partir de 0
   return Longueur_chaine;
 }
 
