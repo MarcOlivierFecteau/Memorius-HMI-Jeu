@@ -187,7 +187,8 @@ void setup()
 
 void loop()
 {
-
+  
+#ifdef GAME
   // Send signal to find human
   comMarketing(GAMEOVER);
 
@@ -214,6 +215,7 @@ void loop()
       playRandomSoundFolder(R2_D2);
     }
   }
+#endif
 
 #ifdef IO_QUICK_CHECK
   // Check for buttons matrix's I/O configuration
