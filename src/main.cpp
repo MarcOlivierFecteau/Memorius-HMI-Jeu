@@ -9,17 +9,17 @@ Testing file for final project
 
 #include <Arduino.h>
 #include <LibRobus.h>
-#include <LiquidCrystal_I2C.h>
-#include <wire.h>
-#include "ComMarketing.h"
-#include "Constants.h"
-#include <SoftwareSerial.h>
-#include <DFRobotDFPlayerMini.h>
+#include <LiquidCrystal_I2C.h> // LCD functions
+#include <wire.h> // LCD functions
+#include <SoftwareSerial.h> // MP3 functions
+#include <DFRobotDFPlayerMini.h> // MP3 module library
+#include "ComMarketing.h" // Function for basic communication protocol between two Arduinos
+#include "Constants.h" // Defines
 
 /******************************** Debugging/Configuration ********************************/
 
 #define IO_CHECKER_DEBUG
-#define INPUT_CHECKER_DEBUG
+//#define INPUT_CHECKER_DEBUG
 #define DEV_PROMPTS
 //#define COMM_DEBUG
 //#define AUDIO_DEBUG
@@ -140,10 +140,10 @@ DFRobotDFPlayerMini myDFPlayer;
 /******************************** Functions declaration ********************************/
 
 // Convert the button number to the corresponding pin on the Arduino
-int K2LEDPin(int buttonNumber);
+int ButtonToLEDPin(int buttonNumber);
 
 // Convert the button number to the corresponding button pin on the Arduino
-int K2Pin(int buttonNumber);
+int ButtonToPin(int buttonNumber);
 
 /*** Game functions ***/
 void game();
@@ -176,7 +176,7 @@ void playRandomSoundFolder(int NumFolder);
 void setup()
 {
   // Baud rate initalization (for serial monitor prompts)
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // Initialize the buttons matrix
   buttonsPinsInit();
@@ -194,7 +194,7 @@ void setup()
 void loop()
 {
 
-#ifdef COMM_DEBUG
+#ifndef IO_CHECKER_DEBUG
   // Send signal to find human
   comMarketing(GAMEOVER);
 
@@ -229,8 +229,10 @@ void loop()
 #endif
 
 #ifdef INPUT_CHECKER_DEBUG
-  int k = 1; // Button to check input for
-  while (k < 10)
+  int buttonNumber = 1; // Button to check input for
+
+  // Check for input on buttons matrix
+  while (buttonNumber < 10)
   {
     if (inputChecker(k))
     {
@@ -250,7 +252,7 @@ void loop()
 void outputTargetLED(int button)
 {
   /* From the button number, the LED of the corresponding button is lit for 500ms, then turned OFF */
-  int buttonID = K2LEDPin(button);
+  int buttonID = ButtonToLEDPin(button);
 
   // Briefly turn ON the LED, then turn OFF the LED.
   digitalWrite(buttonID, HIGH);
@@ -259,7 +261,7 @@ void outputTargetLED(int button)
   delay(100);
 }
 
-int K2LEDPin(int buttonNumber)
+int ButtonToLEDPin(int buttonNumber)
 {
   /* From the button number ∈ [1,9], output the corresponding LED digital pin on the Arduino */
   switch (buttonNumber)
@@ -293,7 +295,7 @@ int K2LEDPin(int buttonNumber)
   }
 }
 
-int K2Pin(int buttonNumber)
+int ButtonToPin(int buttonNumber)
 {
   /* From the button number [1,9], output the corresponding digital pin on the Arduino */
   switch (buttonNumber)
@@ -566,10 +568,10 @@ void checkButtonMatrix()
 {
   for (int i = 1; i < 10; i++)
   {
-    if (digitalRead(K2Pin(i))) // If input is HIGH, corresponding LED is HIGH
+    if (digitalRead(ButtonToPin(i))) // If input is HIGH, corresponding LED is HIGH
     {
       // Acknowledge input by lighting up pressed button's LED
-      digitalWrite(K2LEDPin(i), HIGH);
+      digitalWrite(ButtonToLEDPin(i), HIGH);
 
 /*** Debugging section ***/
 #ifdef INPUT_CHECKER_DEBUG
@@ -585,7 +587,7 @@ void checkButtonMatrix()
 #endif
 
         // Reset pressed button's LED's state
-        digitalWrite(K2LEDPin(i), LOW);
+        digitalWrite(ButtonToLEDPin(i), LOW);
       }
     }
   }
@@ -615,7 +617,7 @@ bool inputChecker(int targetButton)
   {
     for (int i = 1; i < 10; i++)  // Go through every button
     {
-      if (digitalRead(K2Pin(i))) // Detected an input
+      if (digitalRead(ButtonToPin(i))) // Detected an input
       {
         // (Shorter) time given to user to release the button (ms)
         interval = 5000;
@@ -623,8 +625,7 @@ bool inputChecker(int targetButton)
         // Reset timer
         prevTime = millis();
 
-        
-        while (digitalRead(K2Pin(i))) // Wait for user to release button
+        while (digitalRead(ButtonToPin(i))) // Wait for user to release button
         {
           if (millis() - prevTime > interval) // Start timer for release timeout
           {
@@ -644,12 +645,12 @@ bool inputChecker(int targetButton)
           else  // Release timeout not reached
           {
             // Acknowledge input by lighting up pressed button's LED
-            digitalWrite(K2LEDPin(i), HIGH);
+            digitalWrite(ButtonToLEDPin(i), HIGH);
           }
         }
 
         // Reset pressed button's LED's state
-        digitalWrite(K2LEDPin(i), LOW);
+        digitalWrite(ButtonToLEDPin(i), LOW);
 
 /*** Debugging section ***/
 #ifdef INPUT_CHECKER_DEBUG
@@ -769,27 +770,27 @@ void Afficher_yeux_bouche()
   // Yeux
   lcd.clear();
   lcd.setCursor(6, 0);
-  lcd.write(0);
+  lcd.write(EYE);
   lcd.setCursor(9, 0);
-  lcd.write(0);
+  lcd.write(EYE);
 
   // Bouche
   lcd.setCursor(4, 1);
-  lcd.write(4);
+  lcd.write(NORMAL_MOUTH_C);
   lcd.setCursor(5, 1);
-  lcd.write(3);
+  lcd.write(NORMAL_MOUTH_3L);
   lcd.setCursor(6, 1);
-  lcd.write(2);
+  lcd.write(NORMAL_MOUTH_2L);
   lcd.setCursor(7, 1);
-  lcd.write(1);
+  lcd.write(NORMAL_MOUTH_1L);
   lcd.setCursor(8, 1);
-  lcd.write(1);
+  lcd.write(NORMAL_MOUTH_1L);
   lcd.setCursor(9, 1);
-  lcd.write(5);
+  lcd.write(NORMAL_MOUTH_1R);
   lcd.setCursor(10, 1);
-  lcd.write(6);
+  lcd.write(NORMAL_MOUTH_2R);
   lcd.setCursor(11, 1);
-  lcd.write(7);
+  lcd.write(NORMAL_MOUTH_3R);
 }
 
 void buttonsPinsInit()

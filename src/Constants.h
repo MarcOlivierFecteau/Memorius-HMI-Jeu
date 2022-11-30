@@ -1,7 +1,7 @@
 /*
 Projet S1 2022 - Équipe P-24: Memorius
 Initialization file with all variables and functions related to setup
-@author Marc-Olivier Fecteau, Pier-Olivier Tarte, Thomas-Xavier Guimont
+@author Marc-Olivier Fecteau, Pier-Olivier Tarte, Thomas-Xavier Guimont, Ethan Beaudoin, Xavier Gervais
 @version 1.0 11/26/2022
 */
 
@@ -61,3 +61,14 @@ bool firstTry = true;  // Second chance token. Voided when calling the function 
 #define SECOND_REWARD_CODE '5' // Code for second reward
 #define THIRD_REWARD_CODE '6' // Code for third reward
 #define FINAL_BOSS_CODE '7' // Code for final boss reward
+
+// Define pins for MP3 module
+#define MP3_RX 10 // MP3 module reception pin
+#define MP3_TX 11 // MP3 module transmission pin
+
+// Define Folder names for MP3 Module
+#define NOTE 1 // Contains sounds for the buttons matrix
+#define DANK 2 // Contains dank (memes) sounds
+#define R2_D2 3 // Contains R2-D2 noises
+#define WIN 4 // Contains sounds/soundtracks for rewards
+#define LOSE 5
