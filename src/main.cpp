@@ -502,7 +502,7 @@ tryAgainCheck:
       lcd.clear();
 
       // Show new game message
-      PrintLCD(0, "Round 2: fight!");
+      PrintLCD(0, "Deuxieme chance!");
 
       // Start a new game. The token has been voided by this point, so the user can't play indefinitely.
       delay(3000); // Delay before next game starts
@@ -615,6 +615,9 @@ bool inputChecker(int targetButton)
       {
         delay(10);
 
+        // Play corresponding sound
+        myDFPlayer.playFolder(DANK, i);
+        
         // (Shorter) time given to user to release the button (ms)
         interval = 5000;
 
@@ -632,9 +635,10 @@ bool inputChecker(int targetButton)
 #else
             // Reset pressed button's LED's state
             digitalWrite(ButtonToLEDPin(i), LOW);
-            
+
             // Show user has pressed the button too long
             lcd.clear();
+            delay(250);
             PrintLCD(0, "Trop long!");
 #endif
 
