@@ -382,20 +382,18 @@ void game()
       }
     }
 
-    // All inputs were correct: increase score and go to next level.
+    // All inputs were correct: increase score.
     score++;
-    delay(2000);
 
-// Debugging section
-#ifdef DEV_PROMPTS
     // Show user the input sequence was correct
     lcd.clear();
     PrintLCD(0, "Correct");
 
-    // Delay for screen to show message
+    // Delay for user acknowledgment
     delay(200);
-#endif
 
+    // Delay between two levels
+    delay(500);
   }
 }
 
