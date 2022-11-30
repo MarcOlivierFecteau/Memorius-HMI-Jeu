@@ -72,3 +72,7 @@ bool firstTry = true;  // Second chance token. Voided when calling the function 
 #define R2_D2 3 // Contains R2-D2 noises
 #define WIN 4 // Contains sounds/soundtracks for rewards
 #define LOSE 5
+
+// Define other constants for MP3 module
+#define DEFAULT_VOLUME 10 // Set speaker volume during initialization
+#define R2_D2_FILES 6 // Number of files for random R2-D2 noises
