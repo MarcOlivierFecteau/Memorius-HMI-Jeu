@@ -630,6 +630,9 @@ bool inputChecker(int targetButton)
             // Show user has pressed the button too long (dev)
             Serial.println("Release timeout.");
 #else
+            // Reset pressed button's LED's state
+            digitalWrite(ButtonToLEDPin(i), LOW);
+            
             // Show user has pressed the button too long
             lcd.clear();
             PrintLCD(0, "Trop long!");
