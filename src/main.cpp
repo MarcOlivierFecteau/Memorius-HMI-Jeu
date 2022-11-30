@@ -817,7 +817,8 @@ void audioSetup()
 
   // Check if SD card is missing
   if (!myDFPlayer.begin(mySoftwareSerial))
-  { // Use softwareSerial to communicate with mp3.
+  {
+    // Use softwareSerial to communicate with mp3.
     Serial.println("Unable to begin:");
     Serial.println("1. Please recheck the connection!");
     Serial.println("2. Please insert the SD card!");
@@ -828,18 +829,26 @@ void audioSetup()
   // For user acknoledgment of MP3 initialization completion
   Serial.println("DFPlayer Mini online.");
 
-  myDFPlayer.setTimeOut(500); // Set serial communictaion time out 500ms
+  // Set serial communictaion time out to 500ms
+  myDFPlayer.setTimeOut(500);
 
-  myDFPlayer.volume(DEFAULT_VOLUME); // Set volume value (0~30).
+  // Set volume value (0~30).
+  myDFPlayer.volume(DEFAULT_VOLUME);
 
+  // We don't need a custom EQ, so normal EQ is chosen
   myDFPlayer.EQ(DFPLAYER_EQ_NORMAL);
 
+  // Setup output device
   myDFPlayer.outputDevice(DFPLAYER_DEVICE_SD);
 }
 
 void playRandomSoundFolder(int NumFolder)
 {
-  int x;
-  x = rand() % R2_D2_FILES + 1;
-  myDFPlayer.playFolder(NumFolder, x);
+  int randomFile; // File number to play
+
+  // random generation used for random file play inside a folder
+  randomFile = rand() % R2_D2_FILES + 1;
+
+  // Play random file
+  myDFPlayer.playFolder(NumFolder, randomFile);
 }
