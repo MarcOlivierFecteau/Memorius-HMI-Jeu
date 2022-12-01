@@ -30,7 +30,7 @@ Initialization file with all variables and functions related to setup
 #define K33_LED 26
 
 // Define maximum length of the sequence
-#define MAX 30
+#define MAX 50
 
 // Define score thresholds for rewards
 const int FIRST_REWARD_SCORE = 5;
@@ -76,7 +76,8 @@ bool firstTry = true;  // Second chance token. Voided when calling the function 
 #define VOIX 7 //Voice to greet and all ya know
 
 // Define other constants for MP3 module
-#define DEFAULT_VOLUME 10 // Set speaker volume during initialization
+#define NOTE_VOLUME 15 // Set speaker volume for notes during initialization
+#define DANK_VOLUME 10 // Set speaker volume for dank sounds during initialization
 #define R2_D2_FILE_COUNT 6 // Number of files for random R2-D2 noises
 
 /*** Define file ID for each file ***/
