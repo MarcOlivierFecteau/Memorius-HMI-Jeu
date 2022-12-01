@@ -18,7 +18,7 @@ int comMarketing(int Com)
     if (Com == '0')
     {
             PrevComTime = millis();
-            int IntervalMEMOMEMO = 2500;
+            int IntervalMEMOMEMO = 5000;
 
             
 

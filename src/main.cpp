@@ -25,12 +25,12 @@ Testing file for final project
 //#define AUDIO_DEBUG
 #define SPECIAL_CHARACTERS // Compile special characters (mostly here so we can collapse the section)
 #define GAME // Run game in loop
-//#define DANK_SOUNDS // Dank sounds on buttons matrix. If left as comment, note sounds (default) will be played
 
 /******************************** Global variables ********************************/
 
 int score = 0;  // The user's score
 unsigned long prevTime = 0; // Countdown timer reset
+unsigned long blinkPrevTime = 0; // Countdown timer for the blinkingLED
 
 LiquidCrystal_I2C lcd(0x27, COLS, ROWS); // Create object for LCD display
 
@@ -160,7 +160,7 @@ void Afficher_yeux_bouche(); // Afficher les yeux et la bouche par défaut
 /*** Setup functions ***/
 void buttonsPinsInit(); // Initialize pins' state for pins used by buttons matrix
 void LCDInit(); // Configure and initialize the LCD display
-void audioSetup(); // Configure and initializae the MP3 module
+void audioSetup();
 
 /*** Audio Module function ***/
 void playRandomSoundFolder(int NumFolder);
@@ -186,16 +186,17 @@ void setup()
   // For user acknowledgment that setup is completed
   Serial.println("Setup completed: Test can start.");
 #endif
+
 }
 
 void loop()
 {
-
+Afficher_yeux_bouche();
 #ifdef GAME
   // Send signal to find human
   comMarketing(GAMEOVER);
 
-  if (comMarketing(READ) == HUMAN_FOUND) // Signal received from first Arduino to start the game
+  if (comMarketing(READ) == HUMAN_FOUND)  // Signal received from first Arduino to start the game
   {
     // Clear screen
     lcd.clear();
@@ -239,6 +240,7 @@ void loop()
     }
   }
 #endif
+
 }
 
 /******************************** Functions initialization ********************************/
@@ -347,6 +349,7 @@ void game()
     PrintLCD(0, "Sequence generated.");
 
 #endif
+
   }
 
   /* Entering main loop */
@@ -354,25 +357,26 @@ void game()
   {
     // Clear screen
     lcd.clear();
-    delay(250);
+    delay(10);
 
     /* Output sequence to buttons matrix */
     for (int i = 0; (i <= score) & (i < MAX); i++)
     {
-      myDFPlayer.playFolder(DANK, sequence[i]);
+      myDFPlayer.playFolder(NOTE, sequence[i]);
       outputTargetLED(sequence[i]);
 
-#ifdef DEV_PROMPTS
+#ifdef DEV_PROMPTSsecondchance
       Serial.print(sequence[i]);
       Serial.print("\t");
 #endif
+
     }
-    Serial.println();
+    //Serial.println();
 
     /* Output message to input sequence */
     PrintLCD(0, "Entrez");
     PrintLCD(1, "la sequence:");
-    delay(200); // Delay for screen to show message
+    //delay(100); // Delay for screen to show message
 
     // For each element of the level, check if user input is correct
     for (int j = 0; (j <= score); j++)
@@ -391,18 +395,18 @@ void game()
       {
         byeBye();
         return;
-      }
+      }                    // If inputResult isn't equal to 1 or 2 (is equal to 0), the input was right
     }
 
     // All inputs were correct: increase score.
     score++;
 
     // Show user the input sequence was correct
-    lcd.clear();
-    PrintLCD(0, "Correct");
+    //lcd.clear();
+    //PrintLCD(0, "Correct");
 
     // Delay between two levels
-    delay(200);
+    delay(400);
   }
 }
 
@@ -417,9 +421,9 @@ void rewardCheck(int score)
   if (score >= FINAL_BOSS_SCORE)
   {
     // Send signal to first Arduino
-    comMarketing(FINAL_BOSS_CODE);
+    comMarketing(THIRD_REWARD_CODE);
 
-    // Play final boss soundtrack
+     // Play final boss soundtrack
     myDFPlayer.playFolder(WIN, 4);
 
     comMarketing(READ);
@@ -497,7 +501,7 @@ void secondChance()
   PrintLCD(1, "(Bouton central)");
 
   // Light up middle bouton's LED
-  digitalWrite(K22_LED, HIGH);
+  blinkingLED(5);
 
 tryAgainCheck:
   // Check for timeout
@@ -582,145 +586,148 @@ void checkButtonMatrix()
 /*** Debugging section ***/
 #ifdef IO_QUICK_CHECK
 
-      // Show button ID on screen
-      lcd.clear();
-      lcd.print("Button pressed:");
-      lcd.setCursor(15, 0);
-      lcd.print(i);
-      delay(1000);
-      lcd.clear();
+        // Show button ID on screen
+        lcd.clear();
+        lcd.print("Button pressed:");
+        lcd.setCursor(15, 0);
+        lcd.print(i);
+        delay(1000);
+        lcd.clear();
 
 #endif
-
-      // Reset pressed button's LED's state
-      digitalWrite(ButtonToLEDPin(i), LOW);
-    }
-  }
-}
-
-int inputChecker(int targetButton)
-{
-  unsigned long timeoutInterval = 10000; // Time given to user to press a button (ms)
-
-  // Reset timer
-  prevTime = millis();
-
-recheck:
-  if (millis() - prevTime > timeoutInterval) // Start timer for input timeout
-  {
-
-#ifdef DEV_PROMPTS
-    // Show user took too long to press a button
-    Serial.println("Input timeout.");
-#else
-
-    if (timeout()) // J-P has tried messing with the robot
-    {
-      // Show J-P we know it's him
-      PrintLCD(0, "ALEX ET JP TIME");
-      myDFPlayer.playFolder(8, millis() % 2 + 1);
-
-      delay(8000);
-      return 2; // J-P messing with us, no reward
-    }
-    else
-    {
-      return 1;
-    }
-
-#endif
-  }
-  else // Input timeout not reached
-  {
-    for (int i = 1; i < 10; i++) // Go through every button
-    {
-      if (digitalRead(ButtonToPin(i))) // Detected an input
-      {
-        delay(10);
-
-        // Play corresponding sound
-        myDFPlayer.playFolder(DANK, i);
-
-        // (Shorter) time given to user to release the button (ms)
-        timeoutInterval = 5000;
-
-        // Reset timer
-        prevTime = millis();
-
-        while (digitalRead(ButtonToPin(i))) // Wait for user to release button
-        {
-          if (millis() - prevTime > timeoutInterval) // Start timer for release timeout
-          {
-
-#ifdef DEV_PROMPTS
-            // Show user has pressed the button too long (dev)
-            Serial.println("Release timeout.");
-#else
-            // Reset pressed button's LED's state
-            digitalWrite(ButtonToLEDPin(i), LOW);
-
-            // J-P has tried messing with the bot
-            PrintLCD(0, "ALEX ET JP TIME");
-            myDFPlayer.playFolder(8, millis() % 2 + 1);
-
-            delay(8000);
-
-            return 2; // J-P messing with us, no reward
-#endif
-          }
-          else // Release timeout not reached
-          {
-            // Acknowledge input by lighting up pressed button's LED
-            digitalWrite(ButtonToLEDPin(i), HIGH);
-          }
-        }
-        delay(10);
 
         // Reset pressed button's LED's state
         digitalWrite(ButtonToLEDPin(i), LOW);
-
-        /*** Debugging section ***/
-#ifdef IO_CHECKER_DEBUG
-        // Show button ID on serial monitor
-        Serial.print("Button pressed: ");
-        Serial.println(i);
-#endif
-
-        // Compare input to target
-        if (i != targetButton) // Input is incorrect
-        {
-
-#ifdef DEV_PROMPTS
-          // Show user the input was incorrect
-          Serial.println("Input incorrect.");
-#else
-          // Show user the input was incorrect
-          lcd.clear();
-          PrintLCD(0, "Partie terminee");
-          delay(2000); // Delay for user acknowledgement
-#endif
-
-          // End function
-          return 1;
-        }
-        else // Input is correct
-        {
-#ifdef DEV_PROMPTS
-          // Show user the input was correct
-          Serial.print("OK\t");
-#endif
-          // End function
-          return 0;
-        }
-      }
-      else if (i == 9) // No input
-      {
-        // Recheck until there's an input
-        goto recheck;
       }
     }
   }
-}
+
+  int inputChecker(int targetButton)
+  {
+    unsigned long timeoutInterval = 10000; // Time given to user to press a button (ms)
+
+    // Reset timer
+    prevTime = millis();
+
+  recheck:
+    if (millis() - prevTime > timeoutInterval) // Start timer for input timeout
+    {
+
+#ifdef DEV_PROMPTS
+      // Show user took too long to press a button
+      Serial.println("Input timeout.");
+#else
+
+      if (timeout()) // J-P has tried messing with the robot
+      {
+        // Show J-P we know it's him
+        lcd.clear();
+        PrintLCD(0, "ALEX ET JP TIME");
+        myDFPlayer.playFolder(8, millis() % 2 + 1);
+
+        delay(8000);
+        return 2; // J-P messing with us, no reward
+      }
+      else
+      {
+        return 1;
+      }
+
+#endif
+
+    }
+    else // Input timeout not reached
+    {
+      for (int i = 1; i < 10; i++) // Go through every button
+      {
+        if (digitalRead(ButtonToPin(i))) // Detected an input
+        {
+          delay(10);
+
+          // Play corresponding sound
+          myDFPlayer.playFolder(NOTE, i);
+
+          // (Shorter) time given to user to release the button (ms)
+          timeoutInterval = 5000;
+
+          // Reset timer
+          prevTime = millis();
+
+          while (digitalRead(ButtonToPin(i))) // Wait for user to release button
+          {
+            if (millis() - prevTime > timeoutInterval) // Start timer for release timeout
+            {
+
+#ifdef DEV_PROMPTS
+              // Show user has pressed the button too long (dev)
+              Serial.println("Release timeout.");
+#else
+              // Reset pressed button's LED's state
+              digitalWrite(ButtonToLEDPin(i), LOW);
+
+              // J-P has tried messing with the bot
+              lcd.clear();
+               PrintLCD(0, "ALEX ET JP TIME");
+               myDFPlayer.playFolder(8, millis()%2 +1);
+
+               delay(8000);
+               
+               return 2; //J-P messing with us, no reward
+#endif    
+            }
+            else // Release timeout not reached
+            {
+              // Acknowledge input by lighting up pressed button's LED
+              digitalWrite(ButtonToLEDPin(i), HIGH);
+            }
+          }
+          delay(10);
+
+          // Reset pressed button's LED's state
+          digitalWrite(ButtonToLEDPin(i), LOW);
+
+  /*** Debugging section ***/
+#ifdef IO_CHECKER_DEBUG
+          // Show button ID on serial monitor
+          Serial.print("Button pressed: ");
+          Serial.println(i);
+#endif
+
+          // Compare input to target
+          if (i != targetButton) // Input is incorrect
+          {
+
+#ifdef DEV_PROMPTS
+            // Show user the input was incorrect
+            Serial.println("Input incorrect.");
+#else
+            // Show user the input was incorrect
+            lcd.clear();
+            PrintLCD(0, "Partie terminee");
+            delay(2000); // Delay for user acknowledgement
+#endif
+
+            // End function
+            return 1;
+          }
+          else // Input is correct
+          {
+#ifdef DEV_PROMPTS
+            // Show user the input was correct
+            Serial.print("OK\t");
+#endif
+            // End function
+            return 0;
+          }
+        }
+        else if (i == 9) // No input
+        {
+          // Recheck until there's an input
+          goto recheck;
+        }
+      }
+    }
+  }
 
 void LCDInit()
 {
@@ -785,14 +792,15 @@ void PrintLCD(int ligne, char texte[])
     Curseur = 0;
   }
   // Clear screen
-  lcd.clear();
-  delay(250);
+  //lcd.clear();
+  delay(50);//250 bon
 
   // Placer le curseur
   lcd.setCursor(Curseur, ligne);
 
   // Afficher le message
   lcd.print(texte);
+  delay(50);
 }
 
 void Afficher_yeux_bouche()
@@ -872,11 +880,7 @@ void audioSetup()
   myDFPlayer.setTimeOut(500);
 
   // Set volume value (0~30).
-#ifdef DANK_SOUNDS
-  myDFPlayer.volume(DANK_VOLUME);
-#else
-  myDFPlayer.volume(NOTE_VOLUME);
-#endif
+  myDFPlayer.volume(DEFAULT_VOLUME);
 
   // We don't need a custom EQ, so normal EQ is chosen
   myDFPlayer.EQ(DFPLAYER_EQ_NORMAL);
@@ -890,11 +894,8 @@ void audioSetup()
 
 void playRandomSoundFolder(int NumFolder)
 {
-#ifndef DANK_SOUNDS
-  myDFPlayer.volume(DANK_VOLUME);
-#endif
   int randomFile; // File number to play
-  int randomSoundInterval = 5000;
+  int randomSoundInterval = 2000;
 
   if (millis() - prevTime > randomSoundInterval)
   {
@@ -907,9 +908,6 @@ void playRandomSoundFolder(int NumFolder)
       myDFPlayer.playFolder(NumFolder, rand() % R2_D2_FILE_COUNT);
     }
   }
-#ifndef DANK_SOUNDS
-  myDFPlayer.volume(NOTE_VOLUME);
-#endif
 }
 
 bool wannaPlay()
@@ -947,9 +945,9 @@ void blinkingLED(int buttonNumber)
 {
   int blinkingInterval = 1000; // Blinking interval in ms
 
-  if (millis() - prevTime <= blinkingInterval)
+  if (millis() - blinkPrevTime <= blinkingInterval)
   {
-    if (millis() - prevTime <= blinkingInterval / 2)
+    if (millis() - blinkPrevTime <= blinkingInterval/2)
     {
       digitalWrite(ButtonToLEDPin(buttonNumber), HIGH);
     }
@@ -961,6 +959,8 @@ void blinkingLED(int buttonNumber)
   else
   {
     // Reset timer
-    prevTime = millis();
+    blinkPrevTime = millis();
   }
 }
+
+

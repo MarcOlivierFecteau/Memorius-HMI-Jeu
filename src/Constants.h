@@ -79,6 +79,7 @@ bool firstTry = true;  // Second chance token. Voided when calling the function 
 #define NOTE_VOLUME 15 // Set speaker volume for notes during initialization
 #define DANK_VOLUME 10 // Set speaker volume for dank sounds during initialization
 #define R2_D2_FILE_COUNT 6 // Number of files for random R2-D2 noises
+#define DEFAULT_VOLUME 15
 
 /*** Define file ID for each file ***/
 
