@@ -416,6 +416,7 @@ void game()
 void rewardCheck(int score)
 {
   // Show score on screen
+  lcd.clear();
   PrintLCD(0, "Score: ");
   lcd.setCursor(13, 0);
   lcd.print(score);
@@ -571,6 +572,7 @@ void byeBye()
   lcd.clear();
   delay(250);
   PrintLCD(0, "Au revoir!");
+  delay(500);
   
 }
 
@@ -621,6 +623,7 @@ void checkButtonMatrix()
       if (timeout()) // J-P has tried messing with the robot
       {
         // Show J-P we know it's him
+        lcd.clear();
         PrintLCD(0, "ALEX ET JP TIME");
         myDFPlayer.playFolder(8, millis() % 2 + 1);
 
@@ -665,6 +668,7 @@ void checkButtonMatrix()
               digitalWrite(ButtonToLEDPin(i), LOW);
 
               // J-P has tried messing with the bot
+              lcd.clear();
                PrintLCD(0, "ALEX ET JP TIME");
                myDFPlayer.playFolder(8, millis()%2 +1);
 
