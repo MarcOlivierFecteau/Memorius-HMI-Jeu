@@ -71,7 +71,9 @@ bool firstTry = true;  // Second chance token. Voided when calling the function 
 #define DANK 2 // Contains dank (memes) sounds
 #define R2_D2 3 // Contains R2-D2 noises
 #define WIN 4 // Contains sounds/soundtracks for rewards
-#define LOSE 5
+#define LOSE 5 //Losing sound
+#define VOIX_SCORE 6 //Voices for the score
+#define VOIX 7 //Voice to greet and all ya know
 
 // Define other constants for MP3 module
 #define DEFAULT_VOLUME 10 // Set speaker volume during initialization

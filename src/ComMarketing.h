@@ -17,9 +17,23 @@ int comMarketing(int Com)
 
     if (Com == '0')
     {
+            PrevComTime = millis();
+            int IntervalMEMOMEMO = 2500;
+
+            
+
 
         while (Com == '0')
         {
+            if (millis() - PrevComTime > IntervalMEMOMEMO and score >= FIRST_REWARD_SCORE and score < SECOND_REWARD_SCORE)
+
+            {
+            myDFPlayer.playFolder(7, 3);
+            PrevComTime=millis();
+            }
+            if(score==0){
+            playRandomSoundFolder(R2_D2);
+            }
             if (Serial1.available() > 0)
             {
                 delay(10);

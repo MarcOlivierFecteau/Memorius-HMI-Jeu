@@ -13,7 +13,7 @@ Testing file for final project
 #include <wire.h> // LCD functions
 #include <SoftwareSerial.h> // MP3 functions
 #include <DFRobotDFPlayerMini.h> // MP3 module library
-#include "ComMarketing.h" // Function for basic communication protocol between two Arduinos
+
 #include "Constants.h" // Defines
 
 /******************************** Debugging/Configuration ********************************/
@@ -165,7 +165,7 @@ void audioSetup();
 /*** Audio Module function ***/
 void playRandomSoundFolder(int NumFolder);
 
-
+#include "ComMarketing.h" // Function for basic communication protocol between two Arduinos
 /******************************** Arduino functions ********************************/
 
 void setup()
@@ -216,10 +216,6 @@ Afficher_yeux_bouche();
     {
       byeBye();
     }
-  }
-  else 
-  {
-    playRandomSoundFolder(R2_D2);
   }
 #endif
 
@@ -331,6 +327,7 @@ int ButtonToPin(int buttonNumber)
 
 void game()
 {
+  myDFPlayer.playFolder (VOIX, 2);
   //delay before the game starts
   delay(1000);
 
@@ -466,7 +463,7 @@ void rewardCheck(int score)
     comMarketing(FIRST_REWARD_CODE);
 
     // Play first reward soundtrack
-    myDFPlayer.playFolder(WIN, 1);
+    myDFPlayer.playFolder(VOIX, 3);
 
     comMarketing(READ);
 
@@ -573,6 +570,7 @@ void byeBye()
   delay(250);
   PrintLCD(0, "Au revoir!");
   delay(500);
+  score=0;
   
 }
 
@@ -897,7 +895,7 @@ void audioSetup()
 void playRandomSoundFolder(int NumFolder)
 {
   int randomFile; // File number to play
-  int randomSoundInterval = 20000;
+  int randomSoundInterval = 2000;
 
   if (millis() - prevTime > randomSoundInterval)
   {
@@ -907,13 +905,14 @@ void playRandomSoundFolder(int NumFolder)
     // Coin flip
     if (rand() % 2) // Play random R2-D2 noises
     {
-      myDFPlayer.playFolder(NumFolder, randomFile);
+      myDFPlayer.playFolder(NumFolder, rand() % R2_D2_FILE_COUNT);
     }
   }
 }
 
 bool wannaPlay()
 {
+  myDFPlayer.playFolder(VOIX, 1);
   lcd.clear();
   PrintLCD(0, "Voulez-vous");
   PrintLCD(1, "jouer avec moi?");
