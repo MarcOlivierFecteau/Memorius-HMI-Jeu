@@ -30,7 +30,7 @@ Initialization file with all variables and functions related to setup
 #define K33_LED 26
 
 // Define maximum length of the sequence
-#define MAX 5
+#define MAX 50
 
 // Define score thresholds for rewards
 const int FIRST_REWARD_SCORE = 5;

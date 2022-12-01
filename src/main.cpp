@@ -30,7 +30,6 @@ Testing file for final project
 
 int score = 0;  // The user's score
 unsigned long prevTime = 0; // Countdown timer reset
-unsigned long blinkPrevTime = 0; // Countdown timer for the blinkingLED
 
 LiquidCrystal_I2C lcd(0x27, COLS, ROWS); // Create object for LCD display
 
@@ -160,7 +159,7 @@ void Afficher_yeux_bouche(); // Afficher les yeux et la bouche par défaut
 /*** Setup functions ***/
 void buttonsPinsInit(); // Initialize pins' state for pins used by buttons matrix
 void LCDInit(); // Configure and initialize the LCD display
-void audioSetup();
+void audioSetup(); // Configure and initializae the MP3 module
 
 /*** Audio Module function ***/
 void playRandomSoundFolder(int NumFolder);
@@ -186,17 +185,16 @@ void setup()
   // For user acknowledgment that setup is completed
   Serial.println("Setup completed: Test can start.");
 #endif
-
 }
 
 void loop()
 {
-Afficher_yeux_bouche();
+
 #ifdef GAME
   // Send signal to find human
   comMarketing(GAMEOVER);
 
-  if (comMarketing(READ) == HUMAN_FOUND)  // Signal received from first Arduino to start the game
+  if (comMarketing(READ) == HUMAN_FOUND) // Signal received from first Arduino to start the game
   {
     // Clear screen
     lcd.clear();
@@ -217,7 +215,7 @@ Afficher_yeux_bouche();
       byeBye();
     }
   }
-  else 
+  else
   {
     playRandomSoundFolder(R2_D2);
   }
@@ -244,7 +242,6 @@ Afficher_yeux_bouche();
     }
   }
 #endif
-
 }
 
 /******************************** Functions initialization ********************************/
@@ -331,9 +328,6 @@ int ButtonToPin(int buttonNumber)
 
 void game()
 {
-  //delay before the game starts
-  delay(1000);
-
   // Reset score
   score = 0;
 
@@ -352,7 +346,6 @@ void game()
     PrintLCD(0, "Sequence generated.");
 
 #endif
-
   }
 
   /* Entering main loop */
@@ -360,64 +353,55 @@ void game()
   {
     // Clear screen
     lcd.clear();
-    delay(10);
+    delay(250);
 
     /* Output sequence to buttons matrix */
     for (int i = 0; (i <= score) & (i < MAX); i++)
     {
-      myDFPlayer.playFolder(NOTE, sequence[i]);
+      myDFPlayer.playFolder(DANK, sequence[i]);
       outputTargetLED(sequence[i]);
 
-#ifdef DEV_PROMPTSsecondchance
+#ifdef DEV_PROMPTS
       Serial.print(sequence[i]);
       Serial.print("\t");
 #endif
-
     }
-    //Serial.println();
+    Serial.println();
 
     /* Output message to input sequence */
     PrintLCD(0, "Entrez");
     PrintLCD(1, "la sequence:");
-    //delay(100); // Delay for screen to show message
+    delay(200); // Delay for screen to show message
 
-    if (score < MAX)
+    // For each element of the level, check if user input is correct
+    for (int j = 0; (j <= score); j++)
     {
-      int j = 0; // Sequence increment
+      int inputResult = inputChecker(sequence[j]);
 
-      while (j <= score)
+      if (inputResult == 1) // Sequence input error
       {
-        switch (inputChecker(sequence[j]))
-        {
-        case 0:
-          j++;
-        case 1:
-          rewardCheck(score);
+        // Determine the reward
+        rewardCheck(score);
 
-          // End game
-          return;
-        case 2:
-          byeBye();
-
-          // End game
-          return;
-        }
+        // End game
+        return;
       }
+      else if (inputResult == 2)
+      {
+        byeBye();
+        return;
+      }
+    }
 
-      // All inputs were correct: Increase score and go to next level.
-      score++;
-    }
-    else // User has beaten the game
-    {
-      rewardCheck(MAX);
-    }
+    // All inputs were correct: increase score.
+    score++;
 
     // Show user the input sequence was correct
-    //lcd.clear();
-    //PrintLCD(0, "Correct");
+    lcd.clear();
+    PrintLCD(0, "Correct");
 
     // Delay between two levels
-    delay(400);
+    delay(200);
   }
 }
 
@@ -433,7 +417,7 @@ void rewardCheck(int score)
     // Send signal to first Arduino
     comMarketing(FINAL_BOSS_CODE);
 
-     // Play final boss soundtrack
+    // Play final boss soundtrack
     myDFPlayer.playFolder(WIN, 4);
 
     comMarketing(READ);
@@ -511,7 +495,7 @@ void secondChance()
   PrintLCD(1, "(Bouton central)");
 
   // Light up middle bouton's LED
-  blinkingLED(5);
+  digitalWrite(K22_LED, HIGH);
 
 tryAgainCheck:
   // Check for timeout
@@ -579,7 +563,6 @@ void byeBye()
   lcd.clear();
   delay(250);
   PrintLCD(0, "Au revoir!");
-  
 }
 
 void checkButtonMatrix()
@@ -651,7 +634,7 @@ recheck:
         delay(10);
 
         // Play corresponding sound
-        myDFPlayer.playFolder(NOTE, i);
+        myDFPlayer.playFolder(DANK, i);
 
         // (Shorter) time given to user to release the button (ms)
         timeoutInterval = 5000;
@@ -677,7 +660,7 @@ recheck:
 
             delay(8000);
 
-            return 2; // JP's messing with us, no reward
+            return 2; // J-P messing with us, no reward
 #endif
           }
           else // Release timeout not reached
@@ -797,15 +780,14 @@ void PrintLCD(int ligne, char texte[])
     Curseur = 0;
   }
   // Clear screen
-  //lcd.clear();
-  delay(50);//250 bon
+  lcd.clear();
+  delay(250);
 
   // Placer le curseur
   lcd.setCursor(Curseur, ligne);
 
   // Afficher le message
   lcd.print(texte);
-  delay(50);
 }
 
 void Afficher_yeux_bouche()
@@ -900,7 +882,7 @@ void audioSetup()
 void playRandomSoundFolder(int NumFolder)
 {
   int randomFile; // File number to play
-  int randomSoundInterval = 20000;
+  int randomSoundInterval = 5000;
 
   if (millis() - prevTime > randomSoundInterval)
   {
@@ -949,9 +931,9 @@ void blinkingLED(int buttonNumber)
 {
   int blinkingInterval = 1000; // Blinking interval in ms
 
-  if (millis() - blinkPrevTime <= blinkingInterval)
+  if (millis() - prevTime <= blinkingInterval)
   {
-    if (millis() - blinkPrevTime <= blinkingInterval/2)
+    if (millis() - prevTime <= blinkingInterval / 2)
     {
       digitalWrite(ButtonToLEDPin(buttonNumber), HIGH);
     }
@@ -963,7 +945,6 @@ void blinkingLED(int buttonNumber)
   else
   {
     // Reset timer
-    blinkPrevTime = millis();
+    prevTime = millis();
   }
 }
-
