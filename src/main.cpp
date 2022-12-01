@@ -408,6 +408,7 @@ void game()
 void rewardCheck(int score)
 {
   // Show score on screen
+  lcd.clear();
   PrintLCD(0, "Score: ");
   lcd.setCursor(13, 0);
   lcd.print(score);
@@ -563,6 +564,11 @@ void byeBye()
   lcd.clear();
   delay(250);
   PrintLCD(0, "Au revoir!");
+<<<<<<< HEAD
+=======
+  delay(500);
+  
+>>>>>>> 84e789bf58a3478d5da8c661b30c97cbb0e8ae91
 }
 
 void checkButtonMatrix()
@@ -674,7 +680,95 @@ recheck:
         // Reset pressed button's LED's state
         digitalWrite(ButtonToLEDPin(i), LOW);
 
+<<<<<<< HEAD
         /*** Debugging section ***/
+=======
+  int inputChecker(int targetButton)
+  {
+    unsigned long timeoutInterval = 10000; // Time given to user to press a button (ms)
+
+    // Reset timer
+    prevTime = millis();
+
+  recheck:
+    if (millis() - prevTime > timeoutInterval) // Start timer for input timeout
+    {
+
+#ifdef DEV_PROMPTS
+      // Show user took too long to press a button
+      Serial.println("Input timeout.");
+#else
+
+      if (timeout()) // J-P has tried messing with the robot
+      {
+        // Show J-P we know it's him
+        lcd.clear();
+        PrintLCD(0, "ALEX ET JP TIME");
+        myDFPlayer.playFolder(8, millis() % 2 + 1);
+
+        delay(8000);
+        return 2; // J-P messing with us, no reward
+      }
+      else
+      {
+        return 1;
+      }
+
+#endif
+
+    }
+    else // Input timeout not reached
+    {
+      for (int i = 1; i < 10; i++) // Go through every button
+      {
+        if (digitalRead(ButtonToPin(i))) // Detected an input
+        {
+          delay(10);
+
+          // Play corresponding sound
+          myDFPlayer.playFolder(NOTE, i);
+
+          // (Shorter) time given to user to release the button (ms)
+          timeoutInterval = 5000;
+
+          // Reset timer
+          prevTime = millis();
+
+          while (digitalRead(ButtonToPin(i))) // Wait for user to release button
+          {
+            if (millis() - prevTime > timeoutInterval) // Start timer for release timeout
+            {
+
+#ifdef DEV_PROMPTS
+              // Show user has pressed the button too long (dev)
+              Serial.println("Release timeout.");
+#else
+              // Reset pressed button's LED's state
+              digitalWrite(ButtonToLEDPin(i), LOW);
+
+              // J-P has tried messing with the bot
+              lcd.clear();
+               PrintLCD(0, "ALEX ET JP TIME");
+               myDFPlayer.playFolder(8, millis()%2 +1);
+
+               delay(8000);
+               
+               return 2; //J-P messing with us, no reward
+#endif    
+            }
+            else // Release timeout not reached
+            {
+              // Acknowledge input by lighting up pressed button's LED
+              digitalWrite(ButtonToLEDPin(i), HIGH);
+            }
+          }
+          delay(10);
+
+          // Reset pressed button's LED's state
+          digitalWrite(ButtonToLEDPin(i), LOW);
+
+  /*** Debugging section ***/
+>>>>>>> 84e789bf58a3478d5da8c661b30c97cbb0e8ae91
 #ifdef IO_CHECKER_DEBUG
         // Show button ID on serial monitor
         Serial.print("Button pressed: ");
