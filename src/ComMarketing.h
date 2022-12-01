@@ -20,30 +20,28 @@ int comMarketing(int Com)
             PrevComTime = millis();
             int IntervalMEMOMEMO = 2500;
 
-            
-
-
-        while (Com == '0')
-        {
-            if (millis() - PrevComTime > IntervalMEMOMEMO and score >= FIRST_REWARD_SCORE and score < SECOND_REWARD_SCORE)
-
+            while (Com == '0')
             {
-            myDFPlayer.playFolder(7, 3);
-            PrevComTime=millis();
-            }
-            if(score==0){
-            playRandomSoundFolder(R2_D2);
-            }
-            if (Serial1.available() > 0)
-            {
-                delay(10);
-                for (int i = 0; Serial1.available() > 0; i++)
+                if (millis() - PrevComTime > IntervalMEMOMEMO and score >= FIRST_REWARD_SCORE and score < SECOND_REWARD_SCORE)
+
                 {
-                    readSerial[i] = Serial1.read();
+                    myDFPlayer.playFolder(7, 3);
+                    PrevComTime = millis();
                 }
-                Com = readSerial[0];
+                if (score == 0)
+                {
+                    playRandomSoundFolder(R2_D2);
+                }
+                if (Serial1.available() > 0)
+                {
+                    delay(10);
+                    for (int i = 0; Serial1.available() > 0; i++)
+                    {
+                        readSerial[i] = Serial1.read();
+                    }
+                    Com = readSerial[0];
+                }
             }
-        }
 
         Serial1.write('0');
 

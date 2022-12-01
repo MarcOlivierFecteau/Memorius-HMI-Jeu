@@ -893,7 +893,6 @@ void playRandomSoundFolder(int NumFolder)
 #ifndef DANK_SOUNDS
   myDFPlayer.volume(DANK_VOLUME);
 #endif
-  int randomFile; // File number to play
   int randomSoundInterval = 5000;
 
   if (millis() - prevTime > randomSoundInterval)
