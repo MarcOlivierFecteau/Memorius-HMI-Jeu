@@ -30,6 +30,7 @@ Testing file for final project
 
 int score = 0;  // The user's score
 unsigned long prevTime = 0; // Countdown timer reset
+unsigned long blinkPrevTime = 0; // Countdown timer for the blinkingLED
 
 LiquidCrystal_I2C lcd(0x27, COLS, ROWS); // Create object for LCD display
 
@@ -190,7 +191,7 @@ void setup()
 
 void loop()
 {
-
+Afficher_yeux_bouche();
 #ifdef GAME
   // Send signal to find human
   comMarketing(GAMEOVER);
@@ -330,6 +331,9 @@ int ButtonToPin(int buttonNumber)
 
 void game()
 {
+  //delay before the game starts
+  delay(1000);
+
   // Reset score
   score = 0;
 
@@ -356,26 +360,26 @@ void game()
   {
     // Clear screen
     lcd.clear();
-    delay(250);
+    delay(10);
 
     /* Output sequence to buttons matrix */
     for (int i = 0; (i <= score) & (i < MAX); i++)
     {
-      myDFPlayer.playFolder(DANK, sequence[i]);
+      myDFPlayer.playFolder(NOTE, sequence[i]);
       outputTargetLED(sequence[i]);
 
-#ifdef DEV_PROMPTS
+#ifdef DEV_PROMPTSsecondchance
       Serial.print(sequence[i]);
       Serial.print("\t");
 #endif
 
     }
-    Serial.println();
+    //Serial.println();
 
     /* Output message to input sequence */
     PrintLCD(0, "Entrez");
     PrintLCD(1, "la sequence:");
-    delay(200); // Delay for screen to show message
+    //delay(100); // Delay for screen to show message
 
     // For each element of the level, check if user input is correct
     for (int j = 0; (j <= score); j++)
@@ -394,18 +398,18 @@ void game()
       {
         byeBye();
         return;
-      }
+      }                    // If inputResult isn't equal to 1 or 2 (is equal to 0), the input was right
     }
 
     // All inputs were correct: increase score.
     score++;
 
     // Show user the input sequence was correct
-    lcd.clear();
-    PrintLCD(0, "Correct");
+    //lcd.clear();
+    //PrintLCD(0, "Correct");
 
     // Delay between two levels
-    delay(200);
+    delay(400);
   }
 }
 
@@ -499,7 +503,7 @@ void secondChance()
   PrintLCD(1, "(Bouton central)");
 
   // Light up middle bouton's LED
-  digitalWrite(K22_LED, HIGH);
+  blinkingLED(5);
 
 tryAgainCheck:
   // Check for timeout
@@ -640,7 +644,7 @@ void checkButtonMatrix()
           delay(10);
 
           // Play corresponding sound
-          myDFPlayer.playFolder(DANK, i);
+          myDFPlayer.playFolder(NOTE, i);
 
           // (Shorter) time given to user to release the button (ms)
           timeoutInterval = 5000;
@@ -786,14 +790,15 @@ void PrintLCD(int ligne, char texte[])
     Curseur = 0;
   }
   // Clear screen
-  lcd.clear();
-  delay(250);
+  //lcd.clear();
+  delay(50);//250 bon
 
   // Placer le curseur
   lcd.setCursor(Curseur, ligne);
 
   // Afficher le message
   lcd.print(texte);
+  delay(50);
 }
 
 void Afficher_yeux_bouche()
@@ -937,9 +942,9 @@ void blinkingLED(int buttonNumber)
 {
   int blinkingInterval = 1000; // Blinking interval in ms
 
-  if (millis() - prevTime <= blinkingInterval)
+  if (millis() - blinkPrevTime <= blinkingInterval)
   {
-    if (millis() - prevTime <= blinkingInterval/2)
+    if (millis() - blinkPrevTime <= blinkingInterval/2)
     {
       digitalWrite(ButtonToLEDPin(buttonNumber), HIGH);
     }
@@ -951,7 +956,7 @@ void blinkingLED(int buttonNumber)
   else
   {
     // Reset timer
-    prevTime = millis();
+    blinkPrevTime = millis();
   }
 }
 
