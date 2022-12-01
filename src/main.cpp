@@ -25,6 +25,7 @@ Testing file for final project
 //#define AUDIO_DEBUG
 #define SPECIAL_CHARACTERS // Compile special characters (mostly here so we can collapse the section)
 #define GAME // Run game in loop
+//#define DANK_SOUNDS // Dank sounds on buttons matrix. If left as comment, note sounds (default) will be played
 
 /******************************** Global variables ********************************/
 
@@ -870,7 +871,11 @@ void audioSetup()
   myDFPlayer.setTimeOut(500);
 
   // Set volume value (0~30).
-  myDFPlayer.volume(DEFAULT_VOLUME);
+#ifdef DANK_SOUNDS
+  myDFPlayer.volume(DANK_VOLUME);
+#else
+  myDFPlayer.volume(NOTE_VOLUME);
+#endif
 
   // We don't need a custom EQ, so normal EQ is chosen
   myDFPlayer.EQ(DFPLAYER_EQ_NORMAL);
@@ -884,6 +889,9 @@ void audioSetup()
 
 void playRandomSoundFolder(int NumFolder)
 {
+#ifndef DANK_SOUNDS
+  myDFPlayer.volume(DANK_VOLUME);
+#endif
   int randomFile; // File number to play
   int randomSoundInterval = 5000;
 
@@ -895,9 +903,12 @@ void playRandomSoundFolder(int NumFolder)
     // Coin flip
     if (rand() % 2) // Play random R2-D2 noises
     {
-      myDFPlayer.playFolder(NumFolder, randomFile);
+      myDFPlayer.playFolder(NumFolder, rand() % R2_D2_FILE_COUNT);
     }
   }
+#ifndef DANK_SOUNDS
+  myDFPlayer.volume(NOTE_VOLUME);
+#endif
 }
 
 bool wannaPlay()

@@ -74,7 +74,8 @@ bool firstTry = true;  // Second chance token. Voided when calling the function 
 #define LOSE 5
 
 // Define other constants for MP3 module
-#define DEFAULT_VOLUME 10 // Set speaker volume during initialization
+#define NOTE_VOLUME 15 // Set speaker volume for notes during initialization
+#define DANK_VOLUME 10 // Set speaker volume for dank sounds during initialization
 #define R2_D2_FILE_COUNT 6 // Number of files for random R2-D2 noises
 
 /*** Define file ID for each file ***/
