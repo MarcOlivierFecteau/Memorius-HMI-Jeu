@@ -191,12 +191,12 @@ void setup()
 
 void loop()
 {
-Afficher_yeux_bouche();
+  Afficher_yeux_bouche();
 #ifdef GAME
   // Send signal to find human
   comMarketing(GAMEOVER);
 
-  if (comMarketing(READ) == HUMAN_FOUND)  // Signal received from first Arduino to start the game
+  if (comMarketing(READ) == HUMAN_FOUND) // Signal received from first Arduino to start the game
   {
     // Clear screen
     lcd.clear();
@@ -240,7 +240,6 @@ Afficher_yeux_bouche();
     }
   }
 #endif
-
 }
 
 /******************************** Functions initialization ********************************/
@@ -362,7 +361,16 @@ void game()
     /* Output sequence to buttons matrix */
     for (int i = 0; (i <= score) & (i < MAX); i++)
     {
-      myDFPlayer.playFolder(NOTE, sequence[i]);
+      if (i == 5)
+          {
+            myDFPlayer.volume(25);
+            myDFPlayer.playFolder(DANK, FART);
+            myDFPlayer.volume(DEFAULT_VOLUME);
+          }
+          else
+          {
+            myDFPlayer.playFolder(DANK, i);
+          }
       outputTargetLED(sequence[i]);
 
 #ifdef DEV_PROMPTSsecondchance
@@ -463,7 +471,7 @@ void rewardCheck(int score)
     comMarketing(FIRST_REWARD_CODE);
 
     // Play first reward soundtrack
-    myDFPlayer.playFolder(VOIX, 3);
+    myDFPlayer.playFolder(WIN, 1);
 
     comMarketing(READ);
 
@@ -645,7 +653,16 @@ void checkButtonMatrix()
           delay(10);
 
           // Play corresponding sound
-          myDFPlayer.playFolder(NOTE, i);
+          if (i == 5)
+          {
+            myDFPlayer.volume(25);
+            myDFPlayer.playFolder(DANK, FART);
+            myDFPlayer.volume(DEFAULT_VOLUME);
+          }
+          else
+          {
+            myDFPlayer.playFolder(DANK, i);
+          }
 
           // (Shorter) time given to user to release the button (ms)
           timeoutInterval = 5000;
@@ -894,7 +911,6 @@ void audioSetup()
 
 void playRandomSoundFolder(int NumFolder)
 {
-  int randomFile; // File number to play
   int randomSoundInterval = 2000;
 
   if (millis() - prevTime > randomSoundInterval)
@@ -962,5 +978,4 @@ void blinkingLED(int buttonNumber)
     blinkPrevTime = millis();
   }
 }
-
 
